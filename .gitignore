@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local data
+*.db
+
+# macOS
+.DS_Store
+
+CLAUDE.md
+PROGRESS.md
