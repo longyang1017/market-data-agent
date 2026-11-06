@@ -122,7 +122,7 @@ def test_market_data_timeout(monkeypatch, fetch):
     ("fetch", "path", "expected_params"),
     [
         (get_raw_ticker, "/v5/market/tickers", {"category": "spot", "symbol": "BTCUSDT"}),
-        (get_raw_orderbook, "/v5/market/orderbook", {"category": "spot", "symbol": "BTCUSDT", "limit": 5}),
+        (get_raw_orderbook, "/v5/market/orderbook", {"category": "spot", "symbol": "BTCUSDT", "limit": 200}),
         (get_raw_recent_trades, "/v5/market/recent-trade", {"category": "spot", "symbol": "BTCUSDT", "limit": 5}),
     ],
 )

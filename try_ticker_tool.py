@@ -4,7 +4,7 @@ import sys
 import anthropic
 from dotenv import load_dotenv
 
-from tools import GET_TICKER_TOOL
+from tools import GET_TICKER_TOOL, GET_ORDERBOOK_TOOL, GET_RECENT_TRADES_TOOL
 
 load_dotenv()
 client = anthropic.Anthropic()
@@ -13,7 +13,7 @@ question = sys.argv[1] if len(sys.argv) > 1 else "What's the BTC price on Bybit?
 response = client.messages.create(
     model="claude-haiku-5-5",
     max_tokens=1024,
-    tools=[GET_TICKER_TOOL],
+    tools=[GET_TICKER_TOOL, GET_ORDERBOOK_TOOL, GET_RECENT_TRADES_TOOL],
     messages=[{"role": "user", "content": question}],
 )
 

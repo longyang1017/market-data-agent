@@ -80,7 +80,7 @@ class Orderbook(BaseModel):
 def get_raw_orderbook(symbol: str) -> dict:
     return _get_market_data(
         "/v5/market/orderbook",
-        {"category": "spot", "symbol": symbol, "limit": 5},
+        {"category": "spot", "symbol": symbol, "limit": 200},
     )
 
 def parse_orderbook(data:dict) -> Orderbook:
