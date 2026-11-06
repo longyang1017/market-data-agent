@@ -2,6 +2,39 @@ import httpx
 from decimal import Decimal
 from pydantic import BaseModel
 
+
+class BybitError(Exception):
+    pass
+
+
+BASE_URL = "https://api.bybit.com"
+
+
+def _get_market_data(path: str, params: dict[str, str | int]) -> dict:
+    """Fetch a public Bybit endpoint and turn request failures into BybitError."""
+    symbol = params["symbol"]
+    try:
+        response = httpx.get(f"{BASE_URL}{path}", params=params, timeout=5.0)
+        response.raise_for_status()
+    except httpx.TimeoutException as exc:
+        raise BybitError(f"Bybit request timed out for {symbol}") from exc
+    except httpx.HTTPStatusError as exc:
+        raise BybitError(f"Bybit HTTP {exc.response.status_code} for {symbol}") from exc
+    except httpx.RequestError as exc:
+        raise BybitError(f"Could not reach Bybit for {symbol}") from exc
+
+    try:
+        data = response.json()
+    except ValueError as exc:
+        raise BybitError(f"Bybit returned invalid JSON for {symbol}") from exc
+
+    if not isinstance(data, dict) or "retCode" not in data:
+        raise BybitError(f"Bybit returned an unexpected response for {symbol}")
+    if data["retCode"] != 0:
+        message = data.get("retMsg", "unknown error")
+        raise BybitError(f"Bybit error {data['retCode']} for {symbol}: {message}")
+    return data
+
 #define the shape/type of ticker
 class Ticker(BaseModel):
     symbol: str
@@ -11,18 +44,9 @@ class Ticker(BaseModel):
     response_time_ms: int
 
 def get_raw_ticker(symbol: str) -> dict:
-    response = httpx.get(
-        "https://api.bybit.com/v5/market/tickers",
-        params={"category":"spot", "symbol":symbol},
-        timeout=5.0,
+    return _get_market_data(
+        "/v5/market/tickers", {"category": "spot", "symbol": symbol}
     )
-    response.raise_for_status()
-    data = response.json()
-
-    #retCode = 0 means request succeeded
-    if data["retCode"] != 0:
-            raise ValueError(data["retMsg"])
-    return data
 
 def parse_ticker(data:dict) -> Ticker:
     tickers = data["result"]["list"]
@@ -54,18 +78,10 @@ class Orderbook(BaseModel):
     ts: int
 
 def get_raw_orderbook(symbol: str) -> dict:
-    response = httpx.get(
-        "https://api.bybit.com/v5/market/orderbook",
-        params={"category":"spot", "symbol":symbol, "limit": 5},
-        timeout=5.0,
+    return _get_market_data(
+        "/v5/market/orderbook",
+        {"category": "spot", "symbol": symbol, "limit": 5},
     )
-    response.raise_for_status()
-    data = response.json()
-
-    #retCode = 0 means request succeeded
-    if data["retCode"] != 0:
-            raise ValueError(data["retMsg"])
-    return data
 
 def parse_orderbook(data:dict) -> Orderbook:
     orderbooks = data["result"]
@@ -105,18 +121,10 @@ class Trade(BaseModel):
     trade_time_ms: int
 
 def get_raw_recent_trades(symbol: str) -> dict:
-    response = httpx.get(
-        "https://api.bybit.com/v5/market/recent-trade",
-        params={"category":"spot", "symbol":symbol, "limit": 5},
-        timeout=5.0,
+    return _get_market_data(
+        "/v5/market/recent-trade",
+        {"category": "spot", "symbol": symbol, "limit": 5},
     )
-    response.raise_for_status()
-    data = response.json()
-
-    #retCode = 0 means request succeeded
-    if data["retCode"] != 0:
-            raise ValueError(data["retMsg"])
-    return data
 
 def parse_recent_trades(data:dict) -> list[Trade]:
     recent_trades = data["result"]["list"]

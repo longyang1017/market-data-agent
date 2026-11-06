@@ -1,6 +1,15 @@
 import pytest
+import httpx
 from decimal import Decimal
-from exchanges.bybit import parse_ticker, parse_orderbook, parse_recent_trades
+from exchanges.bybit import (
+    BybitError,
+    get_raw_orderbook,
+    get_raw_recent_trades,
+    get_raw_ticker,
+    parse_orderbook,
+    parse_recent_trades,
+    parse_ticker,
+)
 
 
 def test_parse_ticker():
@@ -94,3 +103,80 @@ def test_parse_recent_trades():
     assert trades[0].trade_time_ms == 1793980739100
     assert trades[1].trade_id == "2290000001259057331"
     assert trades[1].price == Decimal("0.000066")
+
+@pytest.mark.parametrize(
+    "fetch",
+    [get_raw_ticker, get_raw_orderbook, get_raw_recent_trades],
+)
+def test_market_data_timeout(monkeypatch, fetch):
+    def fake_get(*args, **kwargs):
+        raise httpx.ReadTimeout("simulated timeout")
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+
+    with pytest.raises(BybitError, match="timed out"):
+        fetch("BTCUSDT")
+
+
+@pytest.mark.parametrize(
+    ("fetch", "path", "expected_params"),
+    [
+        (get_raw_ticker, "/v5/market/tickers", {"category": "spot", "symbol": "BTCUSDT"}),
+        (get_raw_orderbook, "/v5/market/orderbook", {"category": "spot", "symbol": "BTCUSDT", "limit": 5}),
+        (get_raw_recent_trades, "/v5/market/recent-trade", {"category": "spot", "symbol": "BTCUSDT", "limit": 5}),
+    ],
+)
+def test_market_data_request(monkeypatch, fetch, path, expected_params):
+    def fake_get(url, *, params, timeout):
+        assert url == f"https://api.bybit.com{path}"
+        assert params == expected_params
+        assert timeout == 5.0
+        return httpx.Response(
+            200,
+            json={"retCode": 0, "result": {}},
+            request=httpx.Request("GET", url),
+        )
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    assert fetch("BTCUSDT")["retCode"] == 0
+
+
+def test_market_data_http_error(monkeypatch):
+    def fake_get(url, **kwargs):
+        return httpx.Response(503, request=httpx.Request("GET", url))
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    with pytest.raises(BybitError, match="HTTP 503") as error:
+        get_raw_ticker("BTCUSDT")
+    assert isinstance(error.value.__cause__, httpx.HTTPStatusError)
+
+
+def test_market_data_connection_error(monkeypatch):
+    def fake_get(*args, **kwargs):
+        raise httpx.ConnectError("simulated connection failure")
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    with pytest.raises(BybitError, match="Could not reach Bybit"):
+        get_raw_ticker("BTCUSDT")
+
+
+def test_market_data_bybit_error(monkeypatch):
+    def fake_get(url, **kwargs):
+        return httpx.Response(
+            200,
+            json={"retCode": 10001, "retMsg": "Not supported symbols"},
+            request=httpx.Request("GET", url),
+        )
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    with pytest.raises(BybitError, match="10001.*Not supported symbols"):
+        get_raw_ticker("NOTAREALCOINUSDT")
+
+
+def test_market_data_invalid_json(monkeypatch):
+    def fake_get(url, **kwargs):
+        return httpx.Response(200, text="not JSON", request=httpx.Request("GET", url))
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    with pytest.raises(BybitError, match="invalid JSON"):
+        get_raw_ticker("BTCUSDT")
