@@ -1,4 +1,4 @@
-"""One question, one tool: show what Claude asks for. No tool is executed."""
+# One question, one tool: show what Claude asks for. No tool is executed.
 import sys
 
 import anthropic

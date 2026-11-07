@@ -14,7 +14,7 @@ def _get_market_data(path: str, params: dict[str, str | int]) -> dict:
     """Fetch a public Bybit endpoint and turn request failures into BybitError."""
     symbol = params["symbol"]
     try:
-        response = httpx.get(f"{BASE_URL}{path}", params=params, timeout=5.0)
+        response = httpx.get(f"{BASE_URL}{path}", params=params, timeout=5)
         response.raise_for_status()
     except httpx.TimeoutException as exc:
         raise BybitError(f"Bybit request timed out for {symbol}") from exc
@@ -41,7 +41,7 @@ class Ticker(BaseModel):
     last_price: Decimal
     bid_price: Decimal
     ask_price: Decimal
-    response_time_ms: int
+    server_time_ms: int
 
 def get_raw_ticker(symbol: str) -> dict:
     return _get_market_data(
@@ -59,7 +59,7 @@ def parse_ticker(data:dict) -> Ticker:
         last_price=ticker["lastPrice"],
         bid_price=ticker["bid1Price"],
         ask_price=ticker["ask1Price"],
-        response_time_ms=data["time"],
+        server_time_ms=data["time"],
     )
     return clean_ticker
 

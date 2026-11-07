@@ -29,7 +29,7 @@ def test_parse_ticker():
 
     assert ticker.symbol == "BTCUSDT"
     assert ticker.last_price == Decimal("100.50")
-    assert ticker.response_time_ms == 1000
+    assert ticker.server_time_ms == 1000
 
 def test_parse_ticker_rejects_empty_list():
     response = {"time": 1000, "result": {"list": []}}
