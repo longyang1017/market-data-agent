@@ -45,7 +45,7 @@ def build_tool_result(block, tool_functions: dict) -> dict:
         "content": content,
     }
 
-def run_agent(question: str, tool_functions: dict = TOOL_FUNCTIONS) -> str:
+def run_agent(question: str, tool_functions: dict = TOOL_FUNCTIONS) -> dict:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     system_prompt = f"""You answer questions about crypto spot markets using live Bybit data from your tools.
     The current time is {now}.
@@ -60,33 +60,62 @@ def run_agent(question: str, tool_functions: dict = TOOL_FUNCTIONS) -> str:
 
     messages = [{"role": "user", "content": question}]
 
+    tool_calls = []
+    input_tokens = 0
+    output_tokens = 0
+
     for step in range(MAX_STEPS):
         response = client.messages.create(
             model=MODEL,
-            max_tokens=1024,
+            max_tokens=4096,
             system=system_prompt,
             tools=TOOLS,
             messages=messages,
         )
+
+        input_tokens += response.usage.input_tokens
+        output_tokens += response.usage.output_tokens
+
         print(f"step {step + 1}: {response.stop_reason}")
         print("tokens:", response.usage.input_tokens, "in,", response.usage.output_tokens, "out")
+        print("blocks:", [block.type for block in response.content])
+
+        if response.stop_reason == "end_turn":
+            answer = "\n".join(block.text for block in response.content if block.type == "text")
+            return {
+                "answer": answer,
+                "tool_calls": tool_calls,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "completed": True,
+            }
 
         if response.stop_reason != "tool_use":
-            return "".join(
-                block.text for block in response.content if block.type == "text"
-            )
+            return {
+                "answer": f"Stopped: stop_reason={response.stop_reason}",
+                "tool_calls": tool_calls,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "completed": False,
+            }
 
         messages.append({"role": "assistant", "content": response.content})
 
         tool_results = []
         for block in response.content:
             if block.type == "tool_use":
+                tool_calls.append({"name": block.name, "input": block.input})
                 tool_results.append(build_tool_result(block, tool_functions))
 
         messages.append({"role": "user", "content": tool_results})
 
-    return f"Stopped: no final answer after {MAX_STEPS} steps."
-
+    return {
+        "answer": f"Stopped: no final answer after {MAX_STEPS} steps.",
+        "tool_calls": tool_calls,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "completed": False,
+    }
 
 if __name__ == "__main__":
-    print(run_agent("What is an orderbook?"))
+    print(run_agent("What is an orderbook?")["answer"])

@@ -1,0 +1,66 @@
+{
+  "retCode": 0,
+  "retMsg": "OK",
+  "result": {
+    "category": "spot",
+    "list": [
+      {
+        "execId": "2280000001799382644",
+        "symbol": "ETHUSDT",
+        "price": "2239.95",
+        "size": "0.03353",
+        "side": "Buy",
+        "time": "1794155640766",
+        "isBlockTrade": false,
+        "isRPITrade": false,
+        "seq": "186402242570"
+      },
+      {
+        "execId": "2280000001799382643",
+        "symbol": "ETHUSDT",
+        "price": "2239.95",
+        "size": "0.03353",
+        "side": "Buy",
+        "time": "1794155640766",
+        "isBlockTrade": false,
+        "isRPITrade": false,
+        "seq": "186402242570"
+      },
+      {
+        "execId": "2280000001799382642",
+        "symbol": "ETHUSDT",
+        "price": "2239.95",
+        "size": "0.03996",
+        "side": "Buy",
+        "time": "1794155640766",
+        "isBlockTrade": false,
+        "isRPITrade": false,
+        "seq": "186402242570"
+      },
+      {
+        "execId": "2280000001799382641",
+        "symbol": "ETHUSDT",
+        "price": "2239.95",
+        "size": "0.03996",
+        "side": "Buy",
+        "time": "1794155640766",
+        "isBlockTrade": false,
+        "isRPITrade": false,
+        "seq": "186402242570"
+      },
+      {
+        "execId": "2280000001799382640",
+        "symbol": "ETHUSDT",
+        "price": "2239.94",
+        "size": "0.3",
+        "side": "Buy",
+        "time": "1794155640766",
+        "isBlockTrade": false,
+        "isRPITrade": false,
+        "seq": "186402242570"
+      }
+    ]
+  },
+  "retExtInfo": {},
+  "time": 1794155642281
+}

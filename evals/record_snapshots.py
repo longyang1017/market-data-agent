@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 # need to run from project root to see this file (.venv/bin/python -m evals.record_snapshots)
-from exchanges.bybit import get_raw_ticker
+from exchanges.bybit import get_raw_ticker, get_raw_orderbook, get_raw_recent_trades
 
 SNAPSHOT_DIR = Path(__file__).parent / "snapshots"
 
@@ -15,4 +15,7 @@ def save(name: str, data: dict) -> None:
 
 
 if __name__ == "__main__":
-    save("ticker_BTCUSDT", get_raw_ticker("BTCUSDT"))
+    for symbol in ["BTCUSDT", "ETHUSDT"]:
+        save(f"ticker_{symbol}", get_raw_ticker(symbol))
+        save(f"orderbook_{symbol}", get_raw_orderbook(symbol))
+        save(f"trades_{symbol}", get_raw_recent_trades(symbol))
