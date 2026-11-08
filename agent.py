@@ -2,6 +2,7 @@ import anthropic
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import json
+import sys
 
 from exchanges.bybit import get_orderbook, get_recent_trades, get_ticker, BybitError
 from tools import GET_ORDERBOOK_TOOL, GET_RECENT_TRADES_TOOL, GET_TICKER_TOOL
@@ -118,4 +119,8 @@ def run_agent(question: str, tool_functions: dict = TOOL_FUNCTIONS) -> dict:
     }
 
 if __name__ == "__main__":
-    print(run_agent("What is an orderbook?")["answer"])
+    if len(sys.argv) < 2:
+        print('Usage: python agent.py "your question"')
+        sys.exit(1)
+    question = " ".join(sys.argv[1:])
+    print(run_agent(question)["answer"])
