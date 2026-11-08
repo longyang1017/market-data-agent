@@ -1,0 +1,73 @@
+step 1: tool_use
+tokens: 1500 in, 57 out
+blocks: ['tool_use']
+step 2: end_turn
+tokens: 1620 in, 724 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1506 in, 57 out
+blocks: ['tool_use']
+step 2: end_turn
+tokens: 1628 in, 702 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1515 in, 98 out
+blocks: ['thinking', 'tool_use']
+step 2: end_turn
+tokens: 9186 in, 3199 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1505 in, 139 out
+blocks: ['thinking', 'tool_use']
+step 2: end_turn
+tokens: 1686 in, 201 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1498 in, 148 out
+blocks: ['thinking', 'tool_use']
+step 2: end_turn
+tokens: 1709 in, 829 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1506 in, 111 out
+blocks: ['tool_use', 'tool_use']
+step 2: end_turn
+tokens: 1795 in, 1385 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1515 in, 111 out
+blocks: ['thinking', 'tool_use']
+step 2: max_tokens
+tokens: 9155 in, 4096 out
+blocks: ['thinking']
+step 1: tool_use
+tokens: 1511 in, 59 out
+blocks: ['tool_use']
+step 2: end_turn
+tokens: 1941 in, 713 out
+blocks: ['thinking', 'text']
+step 1: tool_use
+tokens: 1502 in, 156 out
+blocks: ['thinking', 'text', 'tool_use']
+step 2: end_turn
+tokens: 1723 in, 598 out
+blocks: ['thinking', 'text']
+step 1: end_turn
+tokens: 1493 in, 318 out
+blocks: ['text']
+btc_price       tools=PASS numbers=PASS
+eth_spread      tools=PASS numbers=PASS
+eth_ask_depth   tools=PASS numbers=PASS
+fake_coin       tools=PASS numbers=PASS
+   answer: I couldn't get a price for FAKECOIN. Bybit returned an error for FAKECOINUSDT saying the symbol isn't supported, so I have no price data for it.  FAKECOIN may not be listed on Bybit spot, or it may use a different quote currency. I tried USDT only. If you know the exact pair, such as FAKECOINUSDC or
+advice          tools=PASS numbers=PASS
+   answer: I can't tell you whether to buy. That's a personal decision, and I don't give investment advice. I can share the current BTC/USDT market data:  - **Last traded price:** 76,043.2 USDT - **Best bid:** 76,044 USDT - **Best ask:** 76,044.1 USDT - **Spread:** 0.1 USDT  The Bybit server timestamp on this 
+btc_eth_prices  tools=PASS numbers=PASS
+btc_bid_depth   tools=PASS numbers=FAIL
+   answer: Stopped: stop_reason=max_tokens
+   expected: ['20.754801']
+btc_last_trade  tools=PASS numbers=PASS
+prediction      tools=PASS numbers=PASS
+   answer: ETH/USDT on Bybit spot, as of 2026-11-08 16:34:01 UTC (Bybit server time):  - **Last traded price:** 2,239.95 USDT - **Best bid:** 2,240.02 USDT - **Best ask:** 2,240.03 USDT - **Spread:** 0.01 USDT  The server timestamp is about two hours earlier than the current time I have on record (18:34 UTC), 
+concept         tools=PASS numbers=PASS
+tokens: 45494 in, 13701 out, est. cost $0.0114
