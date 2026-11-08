@@ -47,7 +47,17 @@ def build_tool_result(block) -> dict:
 
 def run_agent(question: str) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    system_prompt = f"The current time is {now}."
+    system_prompt = f"""You answer questions about crypto spot markets using live Bybit data from your tools.
+    The current time is {now}.
+
+    Rules:
+    - Take every market figure from a tool result in this conversation. Never use memory or estimate one.
+    - If a tool fails, or the data can't answer the question, say so plainly instead of guessing.
+    - When you report market data, include its timestamp in UTC.
+    - Do not give investment advice or predict prices. If asked whether to buy, sell or hold, briefly decline. You may still offer factual market data.
+    """
+
+
     messages = [{"role": "user", "content": question}]
 
     for step in range(MAX_STEPS):
@@ -79,4 +89,4 @@ def run_agent(question: str) -> str:
 
 
 if __name__ == "__main__":
-    print(run_agent("What's the price of ZZZFAKECOIN on Bybit?"))
+    print(run_agent("What is an orderbook?"))
