@@ -20,17 +20,17 @@ TOOL_FUNCTIONS = {
     "get_recent_trades": get_recent_trades,
 }
 
-def run_tool(name: str, tool_input: dict) -> str:
-    function = TOOL_FUNCTIONS[name]
+def run_tool(name: str, tool_input: dict, tool_functions: dict) -> str:
+    function = tool_functions[name]
     result = function(**tool_input)
 
     if isinstance(result, list):
         return json.dumps([item.model_dump(mode="json") for item in result])
     return result.model_dump_json()
 
-def build_tool_result(block) -> dict:
+def build_tool_result(block, tool_functions: dict) -> dict:
     try:
-        content = run_tool(block.name, block.input)
+        content = run_tool(block.name, block.input, tool_functions)
     except (BybitError, ValueError, KeyError, TypeError) as exc:
         return {
             "type": "tool_result",
@@ -45,7 +45,7 @@ def build_tool_result(block) -> dict:
         "content": content,
     }
 
-def run_agent(question: str) -> str:
+def run_agent(question: str, tool_functions: dict = TOOL_FUNCTIONS) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     system_prompt = f"""You answer questions about crypto spot markets using live Bybit data from your tools.
     The current time is {now}.
@@ -81,7 +81,7 @@ def run_agent(question: str) -> str:
         tool_results = []
         for block in response.content:
             if block.type == "tool_use":
-                tool_results.append(build_tool_result(block))
+                tool_results.append(build_tool_result(block, tool_functions))
 
         messages.append({"role": "user", "content": tool_results})
 
